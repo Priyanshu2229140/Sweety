@@ -217,6 +217,24 @@ const updateReading = async (req, res) => {
       });
     }
 
+    // Check the number of readings on the target date
+    const dailyCount = await prisma.reading.count({
+      where: {
+        userId: req.userId,
+        date: readingDate,
+      },
+    });
+
+    const isChangingDate =
+      existingReading.date.getTime() !== readingDate.getTime();
+
+    if (isChangingDate && dailyCount >= 4) {
+      return res.status(409).json({
+        success: false,
+        message: "Maximum four readings allowed per day.",
+      });
+    }
+
     const updatedReading = await prisma.reading.update({
       where: { id: readingId },
       data: {
