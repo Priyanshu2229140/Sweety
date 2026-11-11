@@ -139,6 +139,37 @@ function Dashboard() {
     }
   };
 
+  const handleDeleteReading = async (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this reading?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem("sweety_token");
+
+      const response = await fetch(`${API_BASE_URL}/readings/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete reading.");
+      }
+
+      setReadings((previousReadings) =>
+        previousReadings.filter((reading) => reading.id !== id),
+      );
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Something went wrong.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F1E8] text-[#292824] md:flex">
       {/* Sidebar */}
@@ -377,6 +408,7 @@ function Dashboard() {
                     <th className="py-3 font-medium">Date</th>
                     <th className="py-3 font-medium">Reading slot</th>
                     <th className="py-3 font-medium text-right">Value</th>
+                    <th className="py-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
 
@@ -384,7 +416,7 @@ function Dashboard() {
                   {readings.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={3}
+                        colSpan={4}
                         className="py-8 text-center text-[#77746D]"
                       >
                         No readings recorded yet.
@@ -408,6 +440,15 @@ function Dashboard() {
                             {" "}
                             mg/dL
                           </span>
+                        </td>
+                        <td className="py-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteReading(reading.id)}
+                            className="text-sm text-[#C65D35] hover:text-red-700 font-semibold"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))
