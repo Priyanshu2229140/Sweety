@@ -5,6 +5,9 @@ function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [readings, setReadings] = useState<any[]>([]);
+  const [editingReading, setEditingReading] = useState<any>(null);
+  const [editError, setEditError] = useState("");
+  const [updating, setUpdating] = useState(false);
   useEffect(() => {
     const fetchReadings = async () => {
       try {
@@ -167,6 +170,65 @@ function Dashboard() {
       );
     } catch (error) {
       alert(error instanceof Error ? error.message : "Something went wrong.");
+    }
+  };
+
+  const handleUpdateReading = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingReading) return;
+
+    setUpdating(true);
+    setEditError("");
+
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const token = localStorage.getItem("sweety_token");
+
+      const payload = {
+        date: String(formData.get("date")),
+        slot: String(formData.get("slot")),
+        value: Number(formData.get("value")),
+      };
+
+      const response = await fetch(
+        `${API_BASE_URL}/readings/${editingReading.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update reading.");
+      }
+
+      const refreshResponse = await fetch(`${API_BASE_URL}/readings`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const refreshData = await refreshResponse.json();
+
+      if (!refreshResponse.ok) {
+        throw new Error("Reading updated, but refreshing the list failed.");
+      }
+
+      setReadings(refreshData.readings);
+      setEditingReading(null);
+    } catch (error) {
+      setEditError(
+        error instanceof Error ? error.message : "Something went wrong.",
+      );
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -351,6 +413,81 @@ function Dashboard() {
             </form>
           </section>
         )}
+        {editingReading && (
+  <div className="mb-6 rounded-2xl border border-[#DCD7CB] bg-white p-6">
+    <h2 className="mb-4 text-lg font-semibold text-[#292824]">
+      Edit Reading
+    </h2>
+
+    <form onSubmit={handleUpdateReading} className="space-y-4">
+      <div>
+        <label className="mb-1 block text-sm font-medium">Date</label>
+        <input
+          type="date"
+          name="date"
+          defaultValue={new Date(editingReading.date).toISOString().slice(0, 10)}
+          required
+          className="w-full rounded-lg border border-[#DCD7CB] p-3"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium">Reading Slot</label>
+        <select
+          name="slot"
+          defaultValue={editingReading.slot}
+          required
+          className="w-full rounded-lg border border-[#DCD7CB] p-3"
+        >
+          <option value="Morning fasting">Morning fasting</option>
+          <option value="After breakfast">After breakfast</option>
+          <option value="After lunch">After lunch</option>
+          <option value="After dinner">After dinner</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium">
+          Glucose Level (mg/dL)
+        </label>
+        <input
+          type="number"
+          name="value"
+          min="40"
+          max="600"
+          defaultValue={editingReading.value}
+          required
+          className="w-full rounded-lg border border-[#DCD7CB] p-3"
+        />
+      </div>
+
+      {editError && (
+        <p className="text-sm text-red-600">{editError}</p>
+      )}
+
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          disabled={updating}
+          className="rounded-lg bg-[#C65D35] px-5 py-2 text-white"
+        >
+          {updating ? "Updating..." : "Update Reading"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setEditingReading(null);
+            setEditError("");
+          }}
+          className="rounded-lg border border-[#DCD7CB] px-5 py-2"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+)}
 
         {/* Summary cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
@@ -442,6 +579,12 @@ function Dashboard() {
                           </span>
                         </td>
                         <td className="py-4 text-right">
+                          <button
+                            onClick={() => setEditingReading(reading)}
+                            className="mr-3 text-sm font-medium text-[#C65D35] hover:underline"
+                          >
+                            Edit
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteReading(reading.id)}
