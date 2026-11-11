@@ -1,4 +1,3 @@
-
 import { useState, type FormEvent } from "react";
 import Dashboard from "./components/Dashboard";
 import API_BASE_URL from "./lib/api";
@@ -12,7 +11,7 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(localStorage.getItem("sweety_token"))
+    Boolean(localStorage.getItem("sweety_token")),
   );
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -29,9 +28,7 @@ function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(
-          isRegister
-            ? { name, email, password }
-            : { email, password }
+          isRegister ? { name, email, password } : { email, password },
         ),
       });
 
@@ -44,22 +41,26 @@ function App() {
       localStorage.setItem("sweety_token", data.token);
       setIsAuthenticated(true);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong."
-      );
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
   if (isAuthenticated) {
-    return <Dashboard />;
+    return (
+      <Dashboard
+        onLogout={() => {
+          localStorage.removeItem("sweety_token");
+          setIsAuthenticated(false);
+        }}
+      />
+    );
   }
 
   return (
     <div className="min-h-screen bg-[#F4F1E8] flex items-center justify-center p-5">
       <div className="w-full max-w-5xl grid md:grid-cols-2 bg-[#FAF9F5] rounded-2xl overflow-hidden shadow-2xl">
-
         <div className="hidden md:flex flex-col justify-between bg-[#292824] text-[#F4F1E8] p-12">
           <div>
             <h1 className="text-3xl font-bold">
@@ -76,8 +77,8 @@ function App() {
               Take control of your health journey.
             </h2>
             <p className="text-[#BDB9AF] mt-5 leading-relaxed">
-              Track your glucose levels, understand your patterns,
-              and stay informed with simple daily insights.
+              Track your glucose levels, understand your patterns, and stay
+              informed with simple daily insights.
             </p>
           </div>
 

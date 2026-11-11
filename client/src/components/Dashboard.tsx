@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import API_BASE_URL from "../lib/api";
 
-function Dashboard() {
+function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [readings, setReadings] = useState<any[]>([]);
@@ -304,14 +304,23 @@ function Dashboard() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4
+          ">
             <div className="w-10 h-10 rounded-full bg-[#292824] text-[#F4F1E8] flex items-center justify-center font-semibold">
               DU
             </div>
+
             <div>
               <p className="font-semibold text-sm">{userName}</p>
               <p className="text-xs text-[#77746D]">Personal account</p>
             </div>
+
+            <button
+              onClick={onLogout}
+              className="ml-4 rounded-lg bg-[#292824] px-5 py-2 text-sm font-semibold text-[#F4F1E8] shadow-sm transition-all duration-200 hover:bg-[#C65D35] hover:shadow-md active:scale-95"
+            >
+              Logout
+            </button>
           </div>
         </header>
 
@@ -414,80 +423,82 @@ function Dashboard() {
           </section>
         )}
         {editingReading && (
-  <div className="mb-6 rounded-2xl border border-[#DCD7CB] bg-white p-6">
-    <h2 className="mb-4 text-lg font-semibold text-[#292824]">
-      Edit Reading
-    </h2>
+          <div className="mb-6 rounded-2xl border border-[#DCD7CB] bg-white p-6">
+            <h2 className="mb-4 text-lg font-semibold text-[#292824]">
+              Edit Reading
+            </h2>
 
-    <form onSubmit={handleUpdateReading} className="space-y-4">
-      <div>
-        <label className="mb-1 block text-sm font-medium">Date</label>
-        <input
-          type="date"
-          name="date"
-          defaultValue={new Date(editingReading.date).toISOString().slice(0, 10)}
-          required
-          className="w-full rounded-lg border border-[#DCD7CB] p-3"
-        />
-      </div>
+            <form onSubmit={handleUpdateReading} className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  defaultValue={new Date(editingReading.date)
+                    .toISOString()
+                    .slice(0, 10)}
+                  required
+                  className="w-full rounded-lg border border-[#DCD7CB] p-3"
+                />
+              </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium">Reading Slot</label>
-        <select
-          name="slot"
-          defaultValue={editingReading.slot}
-          required
-          className="w-full rounded-lg border border-[#DCD7CB] p-3"
-        >
-          <option value="Morning fasting">Morning fasting</option>
-          <option value="After breakfast">After breakfast</option>
-          <option value="After lunch">After lunch</option>
-          <option value="After dinner">After dinner</option>
-        </select>
-      </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">
+                  Reading Slot
+                </label>
+                <select
+                  name="slot"
+                  defaultValue={editingReading.slot}
+                  required
+                  className="w-full rounded-lg border border-[#DCD7CB] p-3"
+                >
+                  <option value="Morning fasting">Morning fasting</option>
+                  <option value="After breakfast">After breakfast</option>
+                  <option value="After lunch">After lunch</option>
+                  <option value="After dinner">After dinner</option>
+                </select>
+              </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          Glucose Level (mg/dL)
-        </label>
-        <input
-          type="number"
-          name="value"
-          min="40"
-          max="600"
-          defaultValue={editingReading.value}
-          required
-          className="w-full rounded-lg border border-[#DCD7CB] p-3"
-        />
-      </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">
+                  Glucose Level (mg/dL)
+                </label>
+                <input
+                  type="number"
+                  name="value"
+                  min="40"
+                  max="600"
+                  defaultValue={editingReading.value}
+                  required
+                  className="w-full rounded-lg border border-[#DCD7CB] p-3"
+                />
+              </div>
 
-      {editError && (
-        <p className="text-sm text-red-600">{editError}</p>
-      )}
+              {editError && <p className="text-sm text-red-600">{editError}</p>}
 
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={updating}
-          className="rounded-lg bg-[#C65D35] px-5 py-2 text-white"
-        >
-          {updating ? "Updating..." : "Update Reading"}
-        </button>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={updating}
+                  className="rounded-lg bg-[#C65D35] px-5 py-2 text-white"
+                >
+                  {updating ? "Updating..." : "Update Reading"}
+                </button>
 
-        <button
-          type="button"
-          onClick={() => {
-            setEditingReading(null);
-            setEditError("");
-          }}
-          className="rounded-lg border border-[#DCD7CB] px-5 py-2"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  </div>
-)}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingReading(null);
+                    setEditError("");
+                  }}
+                  className="rounded-lg border border-[#DCD7CB] px-5 py-2"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Summary cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
