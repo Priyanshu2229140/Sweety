@@ -83,4 +83,150 @@ const getDailyReport = async (req, res) => {
   }
 };
 
-module.exports = { getDailyReport };
+const getCurrentMonthReport = async (req, res) => {
+  try {
+    // 1. Get today's date
+    const today = new Date();
+
+    // 2. Calculate current month's date range
+    const startDate = new Date(
+      Date.UTC(today.getFullYear(), today.getMonth(), 1),
+    );
+
+    const endDate = new Date(
+      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+    );
+
+    // 3. Fetch readings for the current month
+    const readings = await prisma.reading.findMany({
+      where: {
+        userId: req.userId,
+        date: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+
+    // 4. Handle empty readings
+    if (readings.length === 0) {
+      return res.status(200).json({
+        success: true,
+        month: today.toISOString().slice(0, 7),
+        count: 0,
+        min: null,
+        max: null,
+        average: null,
+      });
+    }
+
+    // 5. Calculate statistics
+    const values = readings.map((reading) => reading.value);
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    const average = Number(
+      (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(
+        1,
+      ),
+    );
+
+    // 6. Return report
+    return res.status(200).json({
+      success: true,
+      month: today.toISOString().slice(0, 7),
+      count: readings.length,
+      min,
+      max,
+      average,
+    });
+  } catch (error) {
+    console.error("Current month report error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to generate current month report.",
+    });
+  }
+};
+
+const getPreviousMonthReport = async (req, res) => {
+  try {
+    // 1. Get today's date
+    const today = new Date();
+
+    // 2. Calculate previous month's date range
+    const startDate = new Date(
+      Date.UTC(today.getFullYear(), today.getMonth() - 1, 1),
+    );
+
+    const endDate = new Date(
+      Date.UTC(today.getFullYear(), today.getMonth(), 1),
+    );
+
+    // 3. Fetch previous month's readings
+    const readings = await prisma.reading.findMany({
+      where: {
+        userId: req.userId,
+        date: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+
+    // 4. Handle empty readings
+    if (readings.length === 0) {
+      return res.status(200).json({
+        success: true,
+        month: startDate.toISOString().slice(0, 7),
+        count: 0,
+        min: null,
+        max: null,
+        average: null,
+      });
+    }
+
+    // 5. Calculate statistics
+    const values = readings.map((reading) => reading.value);
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    const average = Number(
+      (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(
+        1,
+      ),
+    );
+
+    // 6. Return report
+    return res.status(200).json({
+      success: true,
+      month: startDate.toISOString().slice(0, 7),
+      count: readings.length,
+      min,
+      max,
+      average,
+    });
+  } catch (error) {
+    console.error("Previous month report error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to generate previous month report.",
+    });
+  }
+};
+
+module.exports = {
+  getDailyReport,
+  getCurrentMonthReport,
+  getPreviousMonthReport,
+};
