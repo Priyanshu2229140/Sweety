@@ -1,12 +1,60 @@
-import { useState } from "react";
-const readings = [
-  { time: "08:00 AM", slot: "Morning fasting", value: 95 },
-  { time: "09:30 AM", slot: "After breakfast", value: 132 },
-  { time: "01:30 PM", slot: "After lunch", value: 145 },
-  { time: "08:00 PM", slot: "After dinner", value: 120 },
-];
+import { useEffect, useState } from "react";
+import API_BASE_URL from "../lib/api";
 
 function Dashboard() {
+    const [readings, setReadings] = useState<any[]>([]);
+    useEffect(() => {
+  const fetchReadings = async () => {
+    try {
+      const token = localStorage.getItem("sweety_token");
+
+      const response = await fetch(`${API_BASE_URL}/readings`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch readings");
+      }
+
+      setReadings(data.readings);
+    } catch (error) {
+      console.error("Readings error:", error);
+    }
+  };
+
+  fetchReadings();
+}, []);
+    const [userName, setUserName] = useState("Loading...");
+    useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("sweety_token");
+
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to load profile");
+      }
+
+      setUserName(data.user.name);
+    } catch (error) {
+      console.error("Profile error:", error);
+      setUserName("User");
+    }
+  };
+
+  fetchProfile();
+}, []);
     const [showAddForm, setShowAddForm] = useState(false);
   return (
     <div className="min-h-screen bg-[#F4F1E8] text-[#292824] md:flex">
@@ -91,7 +139,7 @@ function Dashboard() {
               DU
             </div>
             <div>
-              <p className="font-semibold text-sm">Demo User</p>
+              <p className="font-semibold text-sm">{userName}</p>
               <p className="text-xs text-[#77746D]">Personal account</p>
             </div>
           </div>
@@ -242,23 +290,43 @@ function Dashboard() {
               <table className="w-full text-sm text-left">
                 <thead>
                   <tr className="border-b border-[#E5E0D5] text-[#77746D]">
-                    <th className="py-3 font-medium">Time</th>
-                    <th className="py-3 font-medium">Reading slot</th>
-                    <th className="py-3 font-medium text-right">Value</th>
+                    <th className="py-3 font-medium">Date</th>
+<th className="py-3 font-medium">Reading slot</th>
+<th className="py-3 font-medium text-right">Value</th>
                   </tr>
                 </thead>
 
-                <tbody>
-                  {readings.map((reading) => (
-                    <tr key={reading.slot} className="border-b border-[#F0EDE5] last:border-0">
-                      <td className="py-4 whitespace-nowrap">{reading.time}</td>
-                      <td className="py-4">{reading.slot}</td>
-                      <td className="py-4 text-right font-bold">
-                        {reading.value} <span className="text-xs font-normal text-[#77746D]">mg/dL</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+                
+<tbody>
+  {readings.length === 0 ? (
+    <tr>
+      <td colSpan={3} className="py-8 text-center text-[#77746D]">
+        No readings recorded yet.
+      </td>
+    </tr>
+  ) : (
+    readings.map((reading) => (
+      <tr
+        key={reading.id}
+        className="border-b border-[#F0EDE5] last:border-0"
+      >
+        <td className="py-4 whitespace-nowrap">
+          {new Date(reading.date).toLocaleDateString("en-IN")}
+        </td>
+
+        <td className="py-4">{reading.slot}</td>
+
+        <td className="py-4 text-right font-bold">
+          {reading.value}
+          <span className="text-xs font-normal text-[#77746D]">
+            {" "}mg/dL
+          </span>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
+
               </table>
             </div>
           </div>
