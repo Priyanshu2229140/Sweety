@@ -1,11 +1,22 @@
 import { useEffect, useState, type FormEvent } from "react";
 import API_BASE_URL from "../lib/api";
-
+import DashboardHeader from "./Dashboard/DashboardHeader";
+import SummaryCards from "./Dashboard/SummaryCards";
+import RecentReadings from "./Dashboard/RecentReadings";
+import AddReadingForm from "./Dashboard/AddReadingForm";
+import EditReadingForm from "./Dashboard/EditReadingForm";
+import QuickAction from "./Dashboard/QuickAction";
+type Reading = {
+  id: number;
+  date: string;
+  slot: string;
+  value: number;
+};
 function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
-  const [readings, setReadings] = useState<any[]>([]);
-  const [editingReading, setEditingReading] = useState<any>(null);
+  const [readings, setReadings] = useState<Reading[]>([]);
+  const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [editError, setEditError] = useState("");
   const [updating, setUpdating] = useState(false);
   useEffect(() => {
@@ -293,345 +304,46 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       {/* Main content */}
       <main className="flex-1 min-w-0 p-5 sm:p-8 lg:p-10">
         {/* Header */}
-        <header className="flex flex-wrap justify-between items-center gap-4 mb-10">
-          <div>
-            <p className="text-sm text-[#77746D]">YOUR HEALTH OVERVIEW</p>
-            <h2 className="text-2xl sm:text-3xl font-bold mt-1">
-              Good morning!
-            </h2>
-            <p className="text-sm text-[#77746D] mt-1">
-              Here's your glucose summary.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4
-          ">
-            <div className="w-10 h-10 rounded-full bg-[#292824] text-[#F4F1E8] flex items-center justify-center font-semibold">
-              DU
-            </div>
-
-            <div>
-              <p className="font-semibold text-sm">{userName}</p>
-              <p className="text-xs text-[#77746D]">Personal account</p>
-            </div>
-
-            <button
-              onClick={onLogout}
-              className="ml-4 rounded-lg bg-[#292824] px-5 py-2 text-sm font-semibold text-[#F4F1E8] shadow-sm transition-all duration-200 hover:bg-[#C65D35] hover:shadow-md active:scale-95"
-            >
-              Logout
-            </button>
-          </div>
-        </header>
+        <DashboardHeader userName={userName} onLogout={onLogout} />
 
         {/* Add Reading Form */}
         {showAddForm && (
-          <section className="bg-white border border-[#E5E0D5] rounded-2xl p-6 mb-8 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-xl font-bold">Add glucose reading</h3>
-                <p className="text-sm text-[#77746D] mt-1">
-                  Record your latest measurement.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="text-[#77746D] hover:text-[#C65D35] text-xl"
-                aria-label="Close form"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form
-              className="grid grid-cols-1 sm:grid-cols-2 gap-5"
-              onSubmit={handleAddReading}
-            >
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Reading date
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  max={new Date().toLocaleDateString("en-CA")}
-                  required
-                  className="w-full border border-[#DCD7CB] rounded-lg px-4 py-3 outline-none focus:border-[#C65D35]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Reading slot
-                </label>
-                <select
-                  name="slot"
-                  required
-                  defaultValue=""
-                  className="w-full border border-[#DCD7CB] rounded-lg px-4 py-3 outline-none focus:border-[#C65D35] bg-white"
-                >
-                  <option value="" disabled>
-                    Select reading slot
-                  </option>
-                  <option>Morning fasting</option>
-                  <option>After breakfast</option>
-                  <option>After lunch</option>
-                  <option>After dinner</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Glucose value (mg/dL)
-                </label>
-                <input
-                  type="number"
-                  name="value"
-                  min="40"
-                  max="600"
-                  step="1"
-                  required
-                  placeholder="e.g. 110"
-                  className="w-full border border-[#DCD7CB] rounded-lg px-4 py-3 outline-none focus:border-[#C65D35]"
-                />
-              </div>
-              {formError && (
-                <p className="sm:col-span-2 text-sm text-red-700 bg-red-50 p-3 rounded-lg">
-                  {formError}
-                </p>
-              )}
-              <div className="flex items-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(false)}
-                  className="flex-1 border border-[#DCD7CB] rounded-lg py-3 font-semibold hover:bg-[#F4F1E8]"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 bg-[#C65D35] text-white rounded-lg py-3 font-semibold hover:bg-[#A94B2B] disabled:opacity-60"
-                >
-                  {saving ? "Saving..." : "Save reading"}
-                </button>
-              </div>
-            </form>
-          </section>
+          <AddReadingForm
+            onSubmit={handleAddReading}
+            onClose={() => setShowAddForm(false)}
+            formError={formError}
+            saving={saving}
+          />
         )}
         {editingReading && (
-          <div className="mb-6 rounded-2xl border border-[#DCD7CB] bg-white p-6">
-            <h2 className="mb-4 text-lg font-semibold text-[#292824]">
-              Edit Reading
-            </h2>
-
-            <form onSubmit={handleUpdateReading} className="space-y-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium">Date</label>
-                <input
-                  type="date"
-                  name="date"
-                  defaultValue={new Date(editingReading.date)
-                    .toISOString()
-                    .slice(0, 10)}
-                  required
-                  className="w-full rounded-lg border border-[#DCD7CB] p-3"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  Reading Slot
-                </label>
-                <select
-                  name="slot"
-                  defaultValue={editingReading.slot}
-                  required
-                  className="w-full rounded-lg border border-[#DCD7CB] p-3"
-                >
-                  <option value="Morning fasting">Morning fasting</option>
-                  <option value="After breakfast">After breakfast</option>
-                  <option value="After lunch">After lunch</option>
-                  <option value="After dinner">After dinner</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  Glucose Level (mg/dL)
-                </label>
-                <input
-                  type="number"
-                  name="value"
-                  min="40"
-                  max="600"
-                  defaultValue={editingReading.value}
-                  required
-                  className="w-full rounded-lg border border-[#DCD7CB] p-3"
-                />
-              </div>
-
-              {editError && <p className="text-sm text-red-600">{editError}</p>}
-
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  disabled={updating}
-                  className="rounded-lg bg-[#C65D35] px-5 py-2 text-white"
-                >
-                  {updating ? "Updating..." : "Update Reading"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingReading(null);
-                    setEditError("");
-                  }}
-                  className="rounded-lg border border-[#DCD7CB] px-5 py-2"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
+          <EditReadingForm
+            reading={editingReading}
+            onSubmit={handleUpdateReading}
+            onCancel={() => {
+              setEditingReading(null);
+              setEditError("");
+            }}
+            editError={editError}
+            updating={updating}
+          />
         )}
-
         {/* Summary cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
-          <div className="bg-[#292824] text-[#F4F1E8] rounded-2xl p-6">
-            <p className="text-sm text-[#BDB9AF]">Today's average</p>
-            <div className="flex items-end gap-2 mt-5">
-              <h3 className="text-4xl font-bold">{average}</h3>
-              <span className="text-sm text-[#BDB9AF] mb-1">mg/dL</span>
-            </div>
-            <p className="text-xs text-[#BDB9AF] mt-3">
-              Based on today's readings
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 border border-[#E5E0D5]">
-            <p className="text-sm text-[#77746D]">Lowest reading</p>
-            <div className="flex items-end gap-2 mt-5">
-              <h3 className="text-4xl font-bold">{lowest}</h3>
-              <span className="text-sm text-[#77746D] mb-1">mg/dL</span>
-            </div>
-            <p className="text-xs text-[#77746D] mt-3">Today's minimum</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 border border-[#E5E0D5] sm:col-span-2 xl:col-span-1">
-            <p className="text-sm text-[#77746D]">Readings recorded</p>
-            <div className="flex items-end gap-2 mt-5">
-              <h3 className="text-4xl font-bold">{readingCount}</h3>
-              <span className="text-sm text-[#77746D] mb-1">today</span>
-            </div>
-            <p className="text-xs text-[#77746D] mt-3">Recorded today</p>
-          </div>
-        </section>
-
+        <SummaryCards
+          average={average}
+          lowest={lowest}
+          readingCount={readingCount}
+        />
         {/* Main dashboard grid */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Readings */}
-          <div className="xl:col-span-2 bg-white rounded-2xl border border-[#E5E0D5] p-6">
-            <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
-              <div>
-                <h3 className="text-lg font-bold">Recent readings</h3>
-                <p className="text-sm text-[#77746D] mt-1">
-                  Your latest glucose measurements
-                </p>
-              </div>
-
-              <button className="text-sm font-semibold text-[#C65D35]">
-                View all →
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead>
-                  <tr className="border-b border-[#E5E0D5] text-[#77746D]">
-                    <th className="py-3 font-medium">Date</th>
-                    <th className="py-3 font-medium">Reading slot</th>
-                    <th className="py-3 font-medium text-right">Value</th>
-                    <th className="py-3 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {readings.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="py-8 text-center text-[#77746D]"
-                      >
-                        No readings recorded yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    readings.map((reading) => (
-                      <tr
-                        key={reading.id}
-                        className="border-b border-[#F0EDE5] last:border-0"
-                      >
-                        <td className="py-4 whitespace-nowrap">
-                          {new Date(reading.date).toLocaleDateString("en-IN")}
-                        </td>
-
-                        <td className="py-4">{reading.slot}</td>
-
-                        <td className="py-4 text-right font-bold">
-                          {reading.value}
-                          <span className="text-xs font-normal text-[#77746D]">
-                            {" "}
-                            mg/dL
-                          </span>
-                        </td>
-                        <td className="py-4 text-right">
-                          <button
-                            onClick={() => setEditingReading(reading)}
-                            className="mr-3 text-sm font-medium text-[#C65D35] hover:underline"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteReading(reading.id)}
-                            className="text-sm text-[#C65D35] hover:text-red-700 font-semibold"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <RecentReadings
+            readings={readings}
+            onEdit={setEditingReading}
+            onDelete={handleDeleteReading}
+          />
 
           {/* Quick action */}
-          <div className="bg-[#E9E2D5] rounded-2xl p-6 flex flex-col justify-between">
-            <div>
-              <p className="text-xs tracking-widest text-[#C65D35] font-bold">
-                QUICK ACTION
-              </p>
-              <h3 className="text-2xl font-bold mt-4">Log a new reading.</h3>
-              <p className="text-sm text-[#77746D] mt-3 leading-relaxed">
-                Keep track of your glucose levels by recording your latest
-                measurement.
-              </p>
-            </div>
-
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="w-full bg-[#C65D35] hover:bg-[#A94B2B] text-white rounded-lg py-3 mt-8 font-semibold transition-colors"
-            >
-              + Add reading
-            </button>
-          </div>
+          <QuickAction onAddReading={() => setShowAddForm(true)} />
         </section>
 
         <footer className="mt-10 text-center text-xs text-[#77746D]">
