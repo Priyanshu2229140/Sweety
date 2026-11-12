@@ -3,6 +3,7 @@ import API_BASE_URL from "../lib/api";
 
 function ReportsPage() {
   const [dailyReport, setDailyReport] = useState<any>(null);
+  const [monthlyReport, setMonthlyReport] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toLocaleDateString("en-CA"),
   );
@@ -45,6 +46,7 @@ function ReportsPage() {
         }
 
         setDailyReport(dailyData);
+        setMonthlyReport(monthlyData);
       } catch (error) {
         setError(
           error instanceof Error ? error.message : "Something went wrong.",
@@ -120,6 +122,47 @@ function ReportsPage() {
               <p className="mt-5 text-sm text-[#77746D]">
                 {dailyReport.count} readings recorded on this date.
               </p>
+              <div className="mt-6">
+                <h3 className="text-lg font-bold mb-4">Reading details</h3>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[450px] text-sm text-left">
+                    <thead>
+                      <tr className="border-b border-[#E5E0D5] text-[#77746D]">
+                        <th className="py-3">Reading slot</th>
+                        <th className="py-3">Glucose level</th>
+                        <th className="py-3">Date</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {dailyReport.readings.map(
+                        (reading: {
+                          id: number;
+                          slot: string;
+                          value: number;
+                          date: string;
+                        }) => (
+                          <tr
+                            key={reading.id}
+                            className="border-b border-[#F0EDE6] last:border-0"
+                          >
+                            <td className="py-4 font-medium">{reading.slot}</td>
+                            <td className="py-4 font-semibold">
+                              {reading.value} mg/dL
+                            </td>
+                            <td className="py-4">
+                              {new Date(reading.date).toLocaleDateString(
+                                "en-IN",
+                              )}
+                            </td>
+                          </tr>
+                        ),
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </>
           ) : (
             <p className="mt-5 text-sm text-[#77746D]">
@@ -130,10 +173,50 @@ function ReportsPage() {
       </section>
 
       <section className="bg-white rounded-2xl border border-[#E5E0D5] p-6">
-        <h2 className="text-xl font-bold mb-5">Monthly Report</h2>
-        <p className="text-sm text-[#77746D]">
-          Your monthly glucose summary will appear here.
+        <h2 className="text-xl font-bold mb-2">Monthly Report</h2>
+
+        <p className="text-sm text-[#77746D] mb-6">
+          Your glucose summary for {monthlyReport?.month || "this month"}.
         </p>
+
+        {loading ? (
+          <p className="text-sm text-[#77746D]">Loading monthly report...</p>
+        ) : monthlyReport && monthlyReport.count > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-xl bg-[#292824] text-white p-5">
+              <p className="text-sm text-[#BDB9AF]">Monthly average</p>
+              <h3 className="text-2xl font-bold mt-3">
+                {monthlyReport.average}{" "}
+                <span className="text-sm font-normal">mg/dL</span>
+              </h3>
+            </div>
+
+            <div className="rounded-xl border border-[#E5E0D5] p-5">
+              <p className="text-sm text-[#77746D]">Lowest reading</p>
+              <h3 className="text-2xl font-bold mt-3">
+                {monthlyReport.min}{" "}
+                <span className="text-sm font-normal">mg/dL</span>
+              </h3>
+            </div>
+
+            <div className="rounded-xl border border-[#E5E0D5] p-5">
+              <p className="text-sm text-[#77746D]">Highest reading</p>
+              <h3 className="text-2xl font-bold mt-3">
+                {monthlyReport.max}{" "}
+                <span className="text-sm font-normal">mg/dL</span>
+              </h3>
+            </div>
+
+            <div className="rounded-xl border border-[#E5E0D5] p-5">
+              <p className="text-sm text-[#77746D]">Total readings</p>
+              <h3 className="text-2xl font-bold mt-3">{monthlyReport.count}</h3>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-[#77746D]">
+            No readings recorded this month.
+          </p>
+        )}
       </section>
     </div>
   );
