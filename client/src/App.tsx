@@ -63,9 +63,32 @@ function App() {
       <div className="w-full max-w-5xl grid md:grid-cols-2 bg-[#FAF9F5] rounded-2xl overflow-hidden shadow-2xl">
         <div className="hidden md:flex flex-col justify-between bg-[#292824] text-[#F4F1E8] p-12">
           <div>
-            <h1 className="text-3xl font-bold">
-              Sweety<span className="text-[#C65D35]">.</span>
-            </h1>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F4F1E8] flex items-center justify-center">
+                <svg viewBox="0 0 40 40" className="w-9 h-9" fill="none">
+                  <path
+                    d="M20 3C20 3 7 18 7 25C7 32.18 12.82 37 20 37C27.18 37 33 32.18 33 25C33 18 20 3 20 3Z"
+                    fill="#C65D35"
+                  />
+                  <path
+                    d="M10 24H16L19 17L23 29L26 23H30"
+                    stroke="#F4F1E8"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+
+              <div>
+                <h1 className="text-3xl font-bold">
+                  Sweety<span className="text-[#C65D35]">.</span>
+                </h1>
+                <p className="text-xs tracking-wider text-[#BDB9AF]">
+                  BLOOD GLUCOSE TRACKER
+                </p>
+              </div>
+            </div>
             <p className="text-[#BDB9AF] mt-2 text-sm">
               Your health, one reading at a time.
             </p>
@@ -89,9 +112,32 @@ function App() {
 
         <div className="p-8 sm:p-12 flex flex-col justify-center">
           <div className="md:hidden mb-10">
-            <h1 className="text-3xl font-bold text-[#292824]">
-              Sweety<span className="text-[#C65D35]">.</span>
-            </h1>
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-[#292824] flex items-center justify-center">
+                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="none">
+                  <path
+                    d="M20 3C20 3 7 18 7 25C7 32.18 12.82 37 20 37C27.18 37 33 32.18 33 25C33 18 20 3 20 3Z"
+                    fill="#C65D35"
+                  />
+                  <path
+                    d="M10 24H16L19 17L23 29L26 23H30"
+                    stroke="#F4F1E8"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+
+              <div>
+                <h1 className="text-3xl font-bold text-[#292824]">
+                  Sweety<span className="text-[#C65D35]">.</span>
+                </h1>
+                <p className="text-[10px] tracking-wider text-[#77746D]">
+                  BLOOD GLUCOSE TRACKER
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="max-w-sm w-full mx-auto">
