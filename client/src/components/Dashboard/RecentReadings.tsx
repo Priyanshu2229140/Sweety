@@ -28,7 +28,7 @@ function RecentReadings({ readings, onEdit, onDelete }: RecentReadingsProps) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left">
+        <table className="w-full min-w-[560px] text-sm text-left">
           <thead>
             <tr className="border-b border-[#E5E0D5] text-[#77746D]">
               <th className="py-3 font-medium">Date</th>
