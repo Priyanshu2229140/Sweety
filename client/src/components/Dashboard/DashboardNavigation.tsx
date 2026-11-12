@@ -1,6 +1,6 @@
 type DashboardNavigationProps = {
-  activePage: "overview" | "readings" | "reports";
-  onNavigate: (page: "overview" | "readings" | "reports") => void;
+  activePage: "overview" | "readings" | "reports" | "doctor";
+  onNavigate: (page: "overview" | "readings" | "reports" | "doctor") => void;
 };
 
 function DashboardNavigation({
@@ -11,6 +11,7 @@ function DashboardNavigation({
     { id: "overview" as const, label: "Overview" },
     { id: "readings" as const, label: "My readings" },
     { id: "reports" as const, label: "Reports" },
+    { id: "doctor" as const, label: "Doctor" },
   ];
 
   const getNavClass = (page: DashboardNavigationProps["activePage"]) =>

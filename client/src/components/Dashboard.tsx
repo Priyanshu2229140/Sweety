@@ -8,6 +8,7 @@ import EditReadingForm from "./Dashboard/EditReadingForm";
 import QuickAction from "./Dashboard/QuickAction";
 import DashboardNavigation from "./Dashboard/DashboardNavigation";
 import ReportsPage from "../pages/ReportsPage";
+import DoctorPage from "./Doctor/DoctorPage";
 type Reading = {
   id: number;
   date: string;
@@ -15,15 +16,15 @@ type Reading = {
   value: number;
 };
 function Dashboard({ onLogout }: { onLogout: () => void }) {
-  const [activePage, setActivePage] = useState<
-    "overview" | "readings" | "reports"
-  >("overview");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [readings, setReadings] = useState<Reading[]>([]);
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [editError, setEditError] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [activePage, setActivePage] = useState<
+    "overview" | "readings" | "reports" | "doctor"
+  >("overview");
   useEffect(() => {
     const fetchReadings = async () => {
       try {
@@ -253,9 +254,12 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       <DashboardNavigation activePage={activePage} onNavigate={setActivePage} />
 
       {/* Main content */}
+
       <main className="flex-1 min-w-0 p-5 sm:p-8 lg:p-10">
         {activePage === "reports" ? (
           <ReportsPage />
+        ) : activePage === "doctor" ? (
+          <DoctorPage />
         ) : (
           <>
             <DashboardHeader userName={userName} onLogout={onLogout} />
