@@ -22,3 +22,10 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+# Testing and coverage
+coverage/
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
