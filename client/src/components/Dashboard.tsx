@@ -7,6 +7,7 @@ import AddReadingForm from "./Dashboard/AddReadingForm";
 import EditReadingForm from "./Dashboard/EditReadingForm";
 import QuickAction from "./Dashboard/QuickAction";
 import DashboardNavigation from "./Dashboard/DashboardNavigation";
+import ReportsPage from "../pages/ReportsPage";
 type Reading = {
   id: number;
   date: string;
@@ -14,6 +15,9 @@ type Reading = {
   value: number;
 };
 function Dashboard({ onLogout }: { onLogout: () => void }) {
+  const [activePage, setActivePage] = useState<
+    "overview" | "readings" | "reports"
+  >("overview");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [readings, setReadings] = useState<Reading[]>([]);
@@ -246,56 +250,59 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
   return (
     <div className="min-h-screen bg-[#F4F1E8] text-[#292824] md:flex">
-      <DashboardNavigation />
+      <DashboardNavigation activePage={activePage} onNavigate={setActivePage} />
 
       {/* Main content */}
       <main className="flex-1 min-w-0 p-5 sm:p-8 lg:p-10">
-        {/* Header */}
-        <DashboardHeader userName={userName} onLogout={onLogout} />
+        {activePage === "reports" ? (
+          <ReportsPage />
+        ) : (
+          <>
+            <DashboardHeader userName={userName} onLogout={onLogout} />
 
-        {/* Add Reading Form */}
-        {showAddForm && (
-          <AddReadingForm
-            onSubmit={handleAddReading}
-            onClose={() => setShowAddForm(false)}
-            formError={formError}
-            saving={saving}
-          />
+            {showAddForm && (
+              <AddReadingForm
+                onSubmit={handleAddReading}
+                onClose={() => setShowAddForm(false)}
+                formError={formError}
+                saving={saving}
+              />
+            )}
+
+            {editingReading && (
+              <EditReadingForm
+                reading={editingReading}
+                onSubmit={handleUpdateReading}
+                onCancel={() => {
+                  setEditingReading(null);
+                  setEditError("");
+                }}
+                editError={editError}
+                updating={updating}
+              />
+            )}
+
+            <SummaryCards
+              average={average}
+              lowest={lowest}
+              readingCount={readingCount}
+            />
+
+            <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <RecentReadings
+                readings={readings}
+                onEdit={setEditingReading}
+                onDelete={handleDeleteReading}
+              />
+
+              <QuickAction onAddReading={() => setShowAddForm(true)} />
+            </section>
+
+            <footer className="mt-10 text-center text-xs text-[#77746D]">
+              Sweety · Blood Glucose Tracker
+            </footer>
+          </>
         )}
-        {editingReading && (
-          <EditReadingForm
-            reading={editingReading}
-            onSubmit={handleUpdateReading}
-            onCancel={() => {
-              setEditingReading(null);
-              setEditError("");
-            }}
-            editError={editError}
-            updating={updating}
-          />
-        )}
-        {/* Summary cards */}
-        <SummaryCards
-          average={average}
-          lowest={lowest}
-          readingCount={readingCount}
-        />
-        {/* Main dashboard grid */}
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Readings */}
-          <RecentReadings
-            readings={readings}
-            onEdit={setEditingReading}
-            onDelete={handleDeleteReading}
-          />
-
-          {/* Quick action */}
-          <QuickAction onAddReading={() => setShowAddForm(true)} />
-        </section>
-
-        <footer className="mt-10 text-center text-xs text-[#77746D]">
-          Sweety · Blood Glucose Tracker
-        </footer>
       </main>
     </div>
   );
