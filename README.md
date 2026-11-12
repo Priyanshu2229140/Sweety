@@ -105,7 +105,9 @@ git clone YOUR_GITHUB_REPOSITORY_URL
 cd sweety
 ```
 
-### 2. Backend setup
+### 2. Backend Setup
+
+Navigate to the server directory and install dependencies:
 
 ```bash
 cd server
@@ -114,7 +116,7 @@ npm install
 
 Create a `.env` file inside the `server` directory using `.env.example` as a reference.
 
-Configure the following variables:
+Configure the following environment variables:
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/sweety_db?schema=public"
@@ -122,7 +124,7 @@ JWT_SECRET="your_secure_random_secret"
 PORT=5000
 ```
 
-Create the PostgreSQL database named `sweety_db` before running migrations.
+Create a PostgreSQL database named `sweety_db` before running migrations.
 
 Run database migrations:
 
@@ -136,7 +138,7 @@ Generate the Prisma client:
 npx prisma generate
 ```
 
-Seed the database with a demo user and sample readings:
+Seed the database with a demo user and sample glucose readings:
 
 ```bash
 npm run seed
@@ -152,22 +154,24 @@ Backend runs at:
 
 `http://localhost:5000`
 
-### 3. Frontend setup
+### 3. Frontend Setup
 
-Open another terminal:
+Open another terminal and navigate to the client directory:
 
 ```bash
 cd client
 npm install
 ```
 
-Create a `.env` file using `client/.env.example`.
+Create a `.env` file inside the `client` directory using `client/.env.example` as a reference.
+
+Configure the API URL:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
-Start the frontend:
+Start the frontend development server:
 
 ```bash
 npm run dev
@@ -230,12 +234,32 @@ Authorization: Bearer YOUR_TOKEN
 
 ## Testing
 
-Run backend tests using:
+The application was manually tested to verify its main workflows.
 
-```bash
-cd server
-npm test
-```
+### Authentication
+
+- User registration with valid and invalid details.
+- Login with correct and incorrect credentials.
+- Password hashing using bcrypt.
+- JWT authentication for protected routes.
+
+### Glucose Readings
+
+- Create, retrieve, update, and delete readings.
+- Validate reading data.
+- Prevent duplicate readings for the same date and time slot.
+
+### Reports
+
+- Verify daily glucose reports.
+- Verify current and previous monthly reports.
+- Check minimum, maximum, and average glucose calculations.
+
+### Frontend
+
+- Verify dashboard, readings, reports, and doctor information.
+- Verify doctor information persists after refreshing the browser.
+- Verify responsive layout and navigation.
 
 ## Assumptions and Notes
 
