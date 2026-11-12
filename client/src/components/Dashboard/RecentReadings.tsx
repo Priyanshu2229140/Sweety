@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 type Reading = {
   id: number;
   date: string;
@@ -12,6 +14,17 @@ type RecentReadingsProps = {
 };
 
 function RecentReadings({ readings, onEdit, onDelete }: RecentReadingsProps) {
+  const [showAll, setShowAll] = useState(false);
+
+  // Show only the 4 most recent readings by default
+  const sortedReadings = [...readings].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+
+  const displayedReadings = showAll
+    ? sortedReadings
+    : sortedReadings.slice(0, 4);
+
   return (
     <div className="xl:col-span-2 bg-white rounded-2xl border border-[#E5E0D5] p-6">
       <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
@@ -22,9 +35,15 @@ function RecentReadings({ readings, onEdit, onDelete }: RecentReadingsProps) {
           </p>
         </div>
 
-        <button className="text-sm font-semibold text-[#C65D35]">
-          View all →
-        </button>
+        {readings.length > 4 && (
+          <button
+            type="button"
+            onClick={() => setShowAll((previous) => !previous)}
+            className="text-sm font-semibold text-[#C65D35] hover:underline"
+          >
+            {showAll ? "Show less ↑" : "View all →"}
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto">
@@ -39,14 +58,14 @@ function RecentReadings({ readings, onEdit, onDelete }: RecentReadingsProps) {
           </thead>
 
           <tbody>
-            {readings.length === 0 ? (
+            {displayedReadings.length === 0 ? (
               <tr>
                 <td colSpan={4} className="py-8 text-center text-[#77746D]">
                   No readings recorded yet.
                 </td>
               </tr>
             ) : (
-              readings.map((reading) => (
+              displayedReadings.map((reading) => (
                 <tr
                   key={reading.id}
                   className="border-b border-[#F0EDE5] last:border-0"
@@ -67,6 +86,7 @@ function RecentReadings({ readings, onEdit, onDelete }: RecentReadingsProps) {
 
                   <td className="py-4 text-right">
                     <button
+                      type="button"
                       onClick={() => onEdit(reading)}
                       className="mr-3 text-sm font-medium text-[#C65D35] hover:underline"
                     >
